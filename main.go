@@ -6,17 +6,27 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func main() {
+	// Load .env file agar environment variable bisa dibaca di lokal/Docker
+	if err := godotenv.Load(); err != nil {
+		log.Println("⚠️  No .env file found, continuing...")
+	}
+
 	// Ambil URL Mongo dari environment
-	mongoURI := os.Getenv("MONGO_URL")
+	mongoURI := os.Getenv("MONGO_PUBLIC_URL")
+	mongoURI = strings.TrimSpace(mongoURI)
+	mongoURI = strings.Trim(mongoURI, "\"") // buang tanda kutip kalau ada
+
 	if mongoURI == "" {
-		log.Fatal("❌ MONGO_URL environment variable not set")
+		log.Fatal("❌ MONGO_PUBLIC_URL environment variable not set")
 	}
 
 	dbName := os.Getenv("DB_NAME")
@@ -38,7 +48,6 @@ func main() {
 	db := client.Database(dbName)
 	featuresCollection := db.Collection("features")
 
-	// Setup router
 	r := gin.Default()
 
 	// GET endpoint
@@ -61,6 +70,5 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{"message": "Feature added successfully"})
 	})
 
-	// Jalankan server di port 8080
 	r.Run(":8080")
 }
