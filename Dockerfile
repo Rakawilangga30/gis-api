@@ -1,5 +1,5 @@
 # Gunakan image Go resmi
-FROM golang:1.22-alpine
+FROM golang:1.24.4-alpine
 
 # Set working directory di dalam container
 WORKDIR /app
